@@ -34,6 +34,8 @@ func main() {
 	config := dbx.Config{
 		Driver: "sqlite3",
 		DBName: ":memory:",
+		MaxIdleConns: 1,
+		MaxOpenConns: 1,
 	}
 
 	// Connect to the database
