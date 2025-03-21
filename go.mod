@@ -1,6 +1,6 @@
 module github.com/alishojaeiir/dbx
 
-go 1.23.2
+go 1.21
 
 require (
 	github.com/go-sql-driver/mysql v1.9.0
