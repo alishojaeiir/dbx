@@ -39,10 +39,6 @@ func Connect(config Config) (*Database, error) {
 	return &Database{DB: conn, Dialect: config.Driver}, nil
 }
 
-func Close(conn *sql.DB) error {
-	return conn.Close()
-}
-
 func max(a, b int) int {
 	if a > b {
 		return a
