@@ -7,6 +7,8 @@ import (
 )
 
 // Connect establishes a connection to the database with retry support.
+// It uses the provided Config to build a DSN and attempts to connect, retrying up to RetryAttempts times.
+// On success, it configures the connection pool with MaxIdleConns, MaxOpenConns, and ConnMaxLifetime.
 func Connect(config Config) (*Database, error) {
 	dsnBuilder, err := getDSNBuilder(config.Driver)
 	if err != nil {
@@ -39,6 +41,7 @@ func Connect(config Config) (*Database, error) {
 	return &Database{DB: conn, Dialect: config.Driver}, nil
 }
 
+// max returns the greater of two integers.
 func max(a, b int) int {
 	if a > b {
 		return a

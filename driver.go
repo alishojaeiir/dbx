@@ -32,8 +32,20 @@ type MySQLDSNBuilder struct{}
 
 // BuildDSN constructs the DSN string for MySQL.
 func (m *MySQLDSNBuilder) BuildDSN(config Config) string {
+	tlsValue := "false"
+	switch config.SSLMode {
+	case "disable", "false":
+		tlsValue = "false"
+	case "require", "true":
+		tlsValue = "true"
+	case "verify-ca", "verify-full", "skip-verify":
+		tlsValue = "skip-verify"
+	default:
+		tlsValue = config.SSLMode
+	}
+
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?tls=%s",
-		config.Username, config.Password, config.Host, config.Port, config.DBName, config.SSLMode)
+		config.Username, config.Password, config.Host, config.Port, config.DBName, tlsValue)
 }
 
 // PostgresDSNBuilder builds DSN for PostgreSQL.
@@ -41,8 +53,22 @@ type PostgresDSNBuilder struct{}
 
 // BuildDSN constructs the DSN string for PostgreSQL.
 func (p *PostgresDSNBuilder) BuildDSN(config Config) string {
+	tlsValue := "disable"
+	switch config.SSLMode {
+	case "disable", "false":
+		tlsValue = "disable"
+	case "require", "true":
+		tlsValue = "require"
+	case "verify-ca":
+		tlsValue = "verify-ca"
+	case "verify-full", "skip-verify":
+		tlsValue = "verify-full"
+	default:
+		tlsValue = config.SSLMode
+	}
+
 	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		config.Host, config.Port, config.Username, config.Password, config.DBName, config.SSLMode)
+		config.Host, config.Port, config.Username, config.Password, config.DBName, tlsValue)
 }
 
 // SQLiteDSNBuilder builds DSN for SQLite.
