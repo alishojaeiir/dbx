@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func main() {
+func mysql_example() {
 	cfg := dbx.Config{
 		Driver:          "mysql",
 		Host:            "127.0.0.1",

@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func main() {
+func postgres_example() {
 	cfg := dbx.Config{
 		Driver:          "postgres",
 		Host:            "127.0.0.1",
