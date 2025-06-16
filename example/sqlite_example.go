@@ -1,4 +1,4 @@
-package main
+package example
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func main() {
+func slite_example() {
 	config := dbx.NewConfig()
 	db, err := dbx.Connect(config)
 	if err != nil {

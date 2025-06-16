@@ -44,6 +44,7 @@ func (m *MySQLDSNBuilder) BuildDSN(config Config) string {
 	default:
 		tlsValue = config.SSLMode
 	}
+
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?tls=%s",
 		config.Username, config.Password, config.Host, config.Port, config.DBName, tlsValue)
 }
@@ -62,7 +63,7 @@ func (p *PostgresDSNBuilder) BuildDSN(config Config) string {
 		tlsValue = "require"
 	case "verify-ca":
 		tlsValue = "verify-ca"
-	case "verify-full":
+	case "verify-full", "skip-verify":
 		tlsValue = "verify-full"
 	default:
 		tlsValue = config.SSLMode

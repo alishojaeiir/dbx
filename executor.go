@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-// QueryExecutor simplifies query execution by handling statement preparation and cleanup.
+// QueryExecutor provides methods to execute database queries with prepared statements.
 type QueryExecutor struct {
 	DB DBExecutor
 }
@@ -20,7 +20,8 @@ func (e *QueryExecutor) QueryRowContext(ctx context.Context, query string, args 
 	return stmt.QueryRowContext(ctx, args...), nil
 }
 
-// ExecContext executes a query that doesn't return rows.
+// ExecContext executes a query that modifies the database with the given context.
+// It prepares the statement, executes it with the provided arguments, and closes the statement.
 func (e *QueryExecutor) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
 	stmt, err := e.DB.PrepareContext(ctx, query)
 	if err != nil {
