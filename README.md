@@ -10,14 +10,10 @@ A lightweight Go package for simplified database connections and query execution
 ```bash
 go get github.com/alishojaeiir/dbx
 ```
-Make sure you have the appropriate database drivers installed:
 
-* PostgreSQL: go get github.com/lib/pq
-* MySQL: go get github.com/go-sql-driver/mysql
-* SQLite: go get github.com/mattn/go-sqlite3
-
-## Usage
-Here's a simple example demonstrating how to connect to a SQLite database, execute a query, and retrieve the result:
+## Quick Start
+### Default SQLite Connection
+If no options are provided, `NewConfig` creates an in-memory SQLite database:
 
 ```go
 package main
@@ -30,36 +26,67 @@ import (
 )
 
 func main() {
-	// Configure the connection
-	config := dbx.Config{
-		Driver: "sqlite3",
-		DBName: ":memory:",
-		MaxIdleConns: 1,
-		MaxOpenConns: 1,
-	}
-
-	// Connect to the database
+	config := dbx.NewConfig() // Uses SQLite with :memory:
 	db, err := dbx.Connect(config)
 	if err != nil {
 		log.Fatalf("Failed to connect: %v", err)
 	}
-	defer db.Executor().Close() // Close the connection when done
+	defer db.Executor().Close()
 
-	// Run a simple query
-	rows, err := db.Executor().QueryContext(context.Background(), "SELECT sqlite_version()")
+	_, err = db.Executor().ExecContext(context.Background(), "CREATE TABLE users (id INTEGER, name TEXT)")
+	if err != nil {
+		log.Fatalf("Failed to create table: %v", err)
+	}
+	fmt.Println("Table created successfully")
+}
+```
+
+Make sure you have the appropriate database drivers installed:
+
+* PostgreSQL: go get github.com/lib/pq
+* MySQL: go get github.com/go-sql-driver/mysql
+* SQLite: go get github.com/mattn/go-sqlite3
+
+## Usage
+Here's a simple example demonstrating how to connect to a SQLite database, execute a query, and retrieve the result:
+
+### mysql
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"github.com/alishojaeiir/dbx"
+)
+
+func main() {
+	config := dbx.NewConfig(
+		dbx.WithDriver("mysql"),
+		dbx.WithHost("127.0.0.1"),
+		dbx.WithPort(3306),
+		dbx.WithUsername("root"),
+		dbx.WithDBName("db"),
+		dbx.WithSSLMode("disable"),
+		dbx.WithMaxIdleConns(15),
+		dbx.WithMaxOpenConns(100),
+	)
+	db, err := dbx.Connect(config)
+	if err != nil {
+		log.Fatalf("Failed to connect: %v", err)
+	}
+	defer db.Executor().Close()
+
+	row, err := db.Executor().QueryRowContext(context.Background(), "SELECT VERSION()")
 	if err != nil {
 		log.Fatalf("Failed to query: %v", err)
 	}
-	defer rows.Close() // Close the rows after use
-
-	// Fetch the result
-	if rows.Next() {
-		var version string
-		if err := rows.Scan(&version); err != nil {
-			log.Fatalf("Failed to scan: %v", err)
-		}
-		fmt.Println("SQLite version:", version)
+	var version string
+	if err := row.Scan(&version); err != nil {
+		log.Fatalf("Failed to scan: %v", err)
 	}
+	fmt.Println("MySQL version:", version)
 }
 ```
 
@@ -69,19 +96,24 @@ func main() {
 * SQLite: Use "sqlite3" as the driver name.
 
 ## Configuration Options
-The Config struct allows you to customize the database connection:
+The dbx.Config struct is configured using NewConfig with the following options:
 
-* Driver: The database driver name (e.g., "postgres", "mysql", "sqlite3").
-* Host: The database host (default: "127.0.0.1" for network-based drivers).
-* Port: The database port (e.g., 5432 for PostgreSQL).
-* Username: Database user.
-* Password: Database password.
-* DBName: Name of the database.
-* SSLMode: SSL mode (e.g., "disable", "require").
-* MaxIdleConns: Maximum number of idle connections (default: 10).
-* MaxOpenConns: Maximum number of open connections (default: 50).
-* ConnMaxLifetime: Maximum lifetime of a connection in seconds (default: 300).
-* RetryAttempts: Number of retry attempts for failed connections (default: 3).
+| Option                  | Description                                     | Default Value |
+|-------------------------|-------------------------------------------------|---------------|
+| `WithDriver`            | Database driver name (e.g., "mysql", "sqlite3") | "sqlite3"     |
+| `WithHost`              | Database host address                           | "127.0.0.1"   |
+| `WithPort`              | Database port                                   | -             |
+| `WithUsername`          | Database username                               | -             |
+| `WithPassword`          | Database password                               | -             |
+| `WithDBName`            | Database name                                   | ":memory:"    |
+| `WithSSLMode`           | SSL/TLS mode (e.g., "disable", "require")       | "disable"     |
+| `WithMaxIdleConns`      | Maximum number of idle connections              | 20            |
+| `WithMaxOpenConns`      | Maximum number of open connections              | 50            |
+| `WithConnMaxLifetime`   | Maximum lifetime of a connection (seconds)      | 600           |
+| `WithRetryAttempts`     | Number of connection retry attempts             | 3             |
+| `WithRetryInterval`     | Interval between retry attempts (seconds)       | 1             |
+
+**Note**: For non-SQLite drivers (e.g., MySQL, PostgreSQL), WithDBName is required. For production, configure WithSSLMode("require") or WithSSLMode("verify-full").
 
 ## Contributing
 Feel free to submit issues or pull requests to the [GitHub repository](https://github.com/alishojaeiir/dbx).

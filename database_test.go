@@ -8,13 +8,31 @@ import (
 	"testing"
 )
 
-func setupSQLite(t *testing.T) *dbx.Database {
-	config := dbx.Config{
-		Driver:       "sqlite3",
-		DBName:       ":memory:",
-		MaxIdleConns: 1,
-		MaxOpenConns: 1,
+func TestConnectDefaultConfig(t *testing.T) {
+	config := dbx.NewConfig() // فقط پیش‌فرض‌ها
+	db, err := dbx.Connect(config)
+	assert.NoError(t, err, "connection with default config should succeed")
+	assert.NotNil(t, db, "database instance should not be nil")
+	if db != nil {
+		defer db.Executor().Close()
 	}
+
+	// تست یه کوئری ساده
+	row, err := db.Executor().QueryRowContext(context.Background(), "SELECT sqlite_version()")
+	assert.NoError(t, err, "query should succeed")
+	var version string
+	assert.NoError(t, row.Scan(&version), "scan should succeed")
+	t.Logf("SQLite version: %s", version)
+}
+
+func setupSQLite(t *testing.T) *dbx.Database {
+	config := dbx.NewConfig(
+		dbx.WithDriver("sqlite3"),
+		dbx.WithDBName(":memory:"),
+		dbx.WithMaxIdleConns(1),
+		dbx.WithMaxOpenConns(1),
+	)
+
 	db, err := dbx.Connect(config)
 	assert.NoError(t, err, "connection should succeed")
 	assert.NotNil(t, db, "database instance should not be nil")
@@ -27,12 +45,12 @@ func setupSQLite(t *testing.T) *dbx.Database {
 }
 
 func TestConnect(t *testing.T) {
-	config := dbx.Config{
-		Driver:       "sqlite3",
-		DBName:       ":memory:",
-		MaxIdleConns: 1,
-		MaxOpenConns: 1,
-	}
+	config := dbx.NewConfig(
+		dbx.WithDriver("sqlite3"),
+		dbx.WithDBName(":memory:"),
+		dbx.WithMaxIdleConns(1),
+		dbx.WithMaxOpenConns(1),
+	)
 	db, err := dbx.Connect(config)
 	assert.NoError(t, err, "connection should succeed")
 	assert.NotNil(t, db, "database instance should not be nil")

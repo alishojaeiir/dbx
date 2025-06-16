@@ -7,20 +7,20 @@ import (
 	"log"
 )
 
-func main() {
-	cfg := dbx.Config{
-		Driver:          "postgres",
-		Host:            "127.0.0.1",
-		Port:            5432,
-		Username:        "root",
-		Password:        "password",
-		DBName:          "db",
-		SSLMode:         "disable",
-		MaxIdleConns:    15,
-		MaxOpenConns:    100,
-		ConnMaxLifetime: 5,
-		RetryAttempts:   3,
-	}
+func postgres_example() {
+	cfg := dbx.NewConfig(
+		dbx.WithDriver("postgres"),
+		dbx.WithHost("127.0.0.1"),
+		dbx.WithPort(5432),
+		dbx.WithUsername("root"),
+		dbx.WithPassword("password"),
+		dbx.WithDBName("db"),
+		dbx.WithSSLMode("disable"),
+		dbx.WithMaxIdleConns(15),
+		dbx.WithMaxOpenConns(100),
+		dbx.WithConnMaxLifetime(5),
+		dbx.WithRetryAttempts(3),
+	)
 
 	conn, err := dbx.Connect(cfg)
 	if err != nil {
