@@ -26,6 +26,7 @@ func postgres_example() {
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
+
 	defer conn.Executor().Close()
 
 	row, err := conn.Executor().QueryRowContext(context.Background(), "SELECT version()")
